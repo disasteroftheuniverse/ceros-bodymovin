@@ -1,0 +1,22 @@
+
+
+
+(function(){
+    require.config ({
+        paths: {
+            CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min"
+        }
+    });
+
+    require(["CerosSDK"], function(CerosSDK){
+        CerosSDK.findExperience()
+        .fail(function(error){
+            console.error(error);
+        })
+        .done(function(experience){
+
+            console.log("hello!");
+        });
+    });
+
+})();
