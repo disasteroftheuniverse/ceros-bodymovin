@@ -4,37 +4,35 @@
     (function () {
         require.config({
             paths: {
-                CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min",
-                bodymovin: "//cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min",
-                animations: "//cdn.rawgit.com/disasteroftheuniverse/ceros-bodymovin/master/animations",
-                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min"
+                CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min", //load in Ceros SDK
+                bodymovin: "//cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min", //load in Bodymovin
+                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min" //loadin Underscore
             }
         });
 
-        require(["CerosSDK"], function (CerosSDK) {
+        require(["CerosSDK"], function (CerosSDK) { // <<---this is an ugly way of nesting callbacks to load in all the necessary external libraries
             require(["bodymovin"], function (bodymovin) {
-                require(["underscore"], function (underscore) {
+                require(["underscore"], function (underscore) {// --- This is hopefully the end of the ugliness --->
                     CerosSDK.findExperience()
-                        .fail(function (error) {
-                            console.error(error);
+                        .fail(function (error) { //make sure we can load the SDK
+                            console.error(error); //boops if SDK not loaded
                         })
-                        .done(function (experience) {
-                            //console.dir(experience);
-                            //console.dir (_.functions(experience));
-                            console.dir(CerosSDK.EVENTS);
-                            //console.dir (_.functions(CerosSDK));
-                            var vecComponentsList = experience.findComponentsByTag("vec");
-                            var vecAnimatedComponents = vecComponentsList.components;
-                            var vecAnimations =[];
-                            console.dir(vecAnimatedComponents);
+                        .done(function (experience) { //once the SDK is loaded, do stuff
+                            //console.dir(experience); //debug
+                            //console.dir (_.functions(experience)); //debug
+                            console.dir(CerosSDK.EVENTS); //debug
+                            //console.dir (_.functions(CerosSDK)); //debug
+                            var vecComponentsList = experience.findComponentsByTag("vec"); 
+                            var vecAnimatedComponents = vecComponentsList.components; //get an array of all elements with "vec" tag
+                            var vecAnimations =[]; //create an empty array to fill with animations
+                            console.dir(vecAnimatedComponents); //debug
                             _.each(vecAnimatedComponents, function (val, key) {
-                                var vecAnimationScript = JSON.parse(val.payload);
+                                var vecAnimationScript = JSON.parse(val.payload); //this might be a giant fucking security problem. revisit later.
                                 var vecId = val.id;
-                                console.dir(vecAnimationScript);
-                                console.log(vecId);
+                                console.dir(vecAnimationScript); //debug
+                                console.log(vecId); //debug
                                 var vecAnimator = bodymovin.loadAnimation({
                                     container: document.getElementById(vecId), // Required
-                                    //path: 'whirl.json', // Required
                                     renderer: 'svg/canvas/html', // Required
                                     loop: true, // Optional
                                     autoplay: true, // Optional
