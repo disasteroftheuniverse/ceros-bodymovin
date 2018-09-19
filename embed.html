@@ -23,7 +23,7 @@
                         })
                         .done(function (experience) { //once the SDK is loaded, do stuff
                             //--------------------------------------------------------------------------------------------
-                            console.dir(CerosSDK.eventHandler);
+
                             var vecComponentsList = experience.findComponentsByTag("vec");
                             var vecAnimatedComponents = vecComponentsList.components; //get an array of all elements with "vec" tag
                             var vecAnimations = [];
@@ -34,8 +34,8 @@
                                 var vecAnimator = bodymovin.loadAnimation({
                                     container: document.getElementById(vecId), // Required
                                     renderer: 'svg/canvas/html', // Required
-                                    loop: false, // Optional
-                                    autoplay: false, // Optional
+                                    loop: true, // Optional
+                                    autoplay: true, // Optional
                                     name: vecId, // Name for future reference. Optional.
                                     animationData: vecAnimationScript
                                 });
@@ -44,23 +44,20 @@
                             });
 
                             $(function () {
+                                var vecScrollComponents = experience.findComponentsByTag("vec-scroll");
                                 var vecElem = [];
-                                _.each(vecAnimatedComponents, function (val, key) {
+                                _.each(vecScrollComponents.components, function (val, key) {
                                     var vecSel = ("#" + String(val.id));
-                                    console.log(vecSel);
                                     var eachVec = $(vecSel);
+                                    console.dir(vecAnimations);
                                     eachVec.on('webkitAnimationStart oanimationstart msAnimationStart animationstart', function (e) {
                                         console.log("boop")
+                                        vecAnimations[key].loop = false;
                                         vecAnimations[key].goToAndPlay(1, 1);
-
                                     });
                                     vecElem.push(eachVec);
                                 });
-                                /*
-                                vecElem[1].on('webkitAnimationEnd oanimationend msAnimationEnd animationend',function(e){
-                                        console.log("boop!");
-                                });*/
-                                console.dir(vecElem);
+                               
                             });
                             //--------------------------------------------------------------------------------------------
                         });
