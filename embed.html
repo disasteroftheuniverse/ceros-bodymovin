@@ -1,22 +1,67 @@
-
-
-
-(function(){
-    require.config ({
-        paths: {
-            CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min"
-        }
-    });
-
-    require(["CerosSDK"], function(CerosSDK){
-        CerosSDK.findExperience()
-        .fail(function(error){
-            console.error(error);
-        })
-        .done(function(experience){
-
-            console.log("hello!");
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js"></script>-->
+<!--<script src="https://cdn.rawgit.com/disasteroftheuniverse/ceros-bodymovin/master/animations.js"></script>-->
+<script type="text/javascript">
+    (function () {
+        require.config({
+            paths: {
+                CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min",
+                bodymovin: "//cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min",
+                animations: "//cdn.rawgit.com/disasteroftheuniverse/ceros-bodymovin/master/animations",
+                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min"
+            }
         });
-    });
 
-})();
+        require(["CerosSDK"], function (CerosSDK) {
+            require(["bodymovin"], function (bodymovin) {
+                require(["underscore"], function (underscore) {
+                    CerosSDK.findExperience()
+                        .fail(function (error) {
+                            console.error(error);
+                        })
+                        .done(function (experience) {
+                            //console.dir(experience);
+                            //console.dir (_.functions(experience));
+                            console.dir(CerosSDK.EVENTS);
+                            //console.dir (_.functions(CerosSDK));
+                            var vecComponentsList = experience.findComponentsByTag("vec");
+                            var vecAnimatedComponents = vecComponentsList.components;
+                            var vecAnimations =[];
+                            console.dir(vecAnimatedComponents);
+                            _.each(vecAnimatedComponents, function (val, key) {
+                                var vecAnimationScript = JSON.parse(val.payload);
+                                var vecId = val.id;
+                                console.dir(vecAnimationScript);
+                                console.log(vecId);
+                                var vecAnimator = bodymovin.loadAnimation({
+                                    container: document.getElementById(vecId), // Required
+                                    //path: 'whirl.json', // Required
+                                    renderer: 'svg/canvas/html', // Required
+                                    loop: true, // Optional
+                                    autoplay: true, // Optional
+                                    name: vecId, // Name for future reference. Optional.
+                                    animationData: vecAnimationScript
+                                });
+                                vecAnimations.push(vecAnimator)
+                                console.dir(vecAnimator);
+                            });
+                            console.dir(vecAnimations);
+                            
+                        });
+
+                });
+            });
+        });
+
+    })();
+
+    /*                            var animation = bodymovin.loadAnimation({
+                                container: document.getElementById('5ba14e8bc7fe7'), // Required
+                                //path: 'whirl.json', // Required
+                                renderer: 'svg/canvas/html', // Required
+                                loop: true, // Optional
+                                autoplay: true, // Optional
+                                name: "Hello World", // Name for future reference. Optional.
+                                animationData: minWhirl
+                            });
+                            */
+</script>
