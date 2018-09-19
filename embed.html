@@ -1,64 +1,69 @@
-<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min.js"></script>-->
-<!--<script src="https://cdn.rawgit.com/disasteroftheuniverse/ceros-bodymovin/master/animations.js"></script>-->
 <script type="text/javascript">
     (function () {
         require.config({
             paths: {
                 CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min", //load in Ceros SDK
                 bodymovin: "//cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min", //load in Bodymovin
-                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min"//, //loadin Underscore
-                //ScrollMagic: "//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/ScrollMagic.min",
-                //scrollMagicIndicators: "//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/plugins/debug.addIndicators.min"
+                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min"//load in Underscore
             }
         });
 
         require(["CerosSDK"], function (CerosSDK) { // <<---this is an ugly way of nesting callbacks to load in all the necessary external libraries
             require(["bodymovin"], function (bodymovin) {
                 require(["underscore"], function (underscore) {// --- This is hopefully the end of the ugliness --->
-                    //require(["ScrollMagic"], function (ScrollMagic) {
-
                     CerosSDK.findExperience()
                         .fail(function (error) { //make sure we can load the SDK
                             console.error(error); //boops if SDK not loaded
                         })
                         .done(function (experience) { //once the SDK is loaded, do stuff
+
                             //--------------------------------------------------------------------------------------------
 
-                            var vecComponentsList = experience.findComponentsByTag("vec");
-                            var vecAnimatedComponents = vecComponentsList.components; //get an array of all elements with "vec" tag
-                            var vecAnimations = [];
+                            $(function () { //load Jquery!
+                                var vecComponentsList = experience.findComponentsByTag("vec");
+                                var vecAnimatedComponents = vecComponentsList.components; //get an array of all elements with "vec" tag
+                                var vecAnimations = [];
 
-                            _.each(vecAnimatedComponents, function (val, key) { //inject each animation into ID container
-                                var vecAnimationScript = JSON.parse(val.payload); //this might be a giant fucking security problem. revisit later.
-                                var vecId = val.id;
-                                var vecAnimator = bodymovin.loadAnimation({
-                                    container: document.getElementById(vecId), // Required
-                                    renderer: 'svg/canvas/html', // Required
-                                    loop: true, // Optional
-                                    autoplay: true, // Optional
-                                    name: vecId, // Name for future reference. Optional.
-                                    animationData: vecAnimationScript
-                                });
-                                vecAnimations.push(vecAnimator);
-
-                            });
-
-                            $(function () {
-                                var vecScrollComponents = experience.findComponentsByTag("vec-scroll");
-                                var vecElem = [];
-                                _.each(vecScrollComponents.components, function (val, key) {
+                                _.each(vecAnimatedComponents, function (val, key) { //inject each animation into ID container
+                                    var vecAnimationScript = JSON.parse(val.payload); //this might be a giant fucking security problem. revisit later.
+                                    var vecId = val.id;
                                     var vecSel = ("#" + String(val.id));
                                     var eachVec = $(vecSel);
-                                    console.dir(vecAnimations);
-                                    eachVec.on('webkitAnimationStart oanimationstart msAnimationStart animationstart', function (e) {
-                                        console.log("boop")
-                                        vecAnimations[key].loop = false;
-                                        vecAnimations[key].goToAndPlay(1, 1);
+                                    var vecAnimator = bodymovin.loadAnimation({
+                                        container: document.getElementById(vecId), // Required
+                                        renderer: 'svg/canvas/html', // Required
+                                        loop: false, // Optional
+                                        autoplay: false, // Optional
+                                        name: vecId, // Name for future reference. Optional.
+                                        animationData: vecAnimationScript
+                                    })
+                                    _.each(val.tags, function (num) {
+                                        if (num == "vec-auto") {
+                                            vecAnimator.loop = true;
+                                            vecAnimator.autoplay = true;
+                                            vecAnimator.play();
+                                            console.log("boop");
+                                        } else if (num == "vec-scroll") {
+                                            //this is kind of a hack. jquery checks if the component is animated and launches if it is
+                                            eachVec.on('webkitAnimationStart oanimationstart msAnimationStart animationstart', function (e) { 
+                                                vecAnimator.loop = false;
+                                                vecAnimator.autoplay = false;
+                                                vecAnimator.goToAndPlay(1, 1);
+                                            });
+                                        } else if (num == "vec-click") { //check if its clickable
+                                            eachVec.on('click', function (e) {
+                                                vecAnimator.loop = false;
+                                                vecAnimator.goToAndPlay(1, 1);
+                                                vecAnimator.autoplay = false;
+                                            });
+                                        };
                                     });
-                                    vecElem.push(eachVec);
+                                    vecAnimations.push(vecAnimator);
+                                    //console.dir(vecAnimatedComponents);
+
                                 });
-                               
                             });
+
                             //--------------------------------------------------------------------------------------------
                         });
                 });
