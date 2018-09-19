@@ -6,47 +6,64 @@
             paths: {
                 CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v4.min", //load in Ceros SDK
                 bodymovin: "//cdnjs.cloudflare.com/ajax/libs/bodymovin/4.13.0/bodymovin.min", //load in Bodymovin
-                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min" //loadin Underscore
+                underscore: "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min"//, //loadin Underscore
+                //ScrollMagic: "//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/ScrollMagic.min",
+                //scrollMagicIndicators: "//cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/plugins/debug.addIndicators.min"
             }
         });
 
         require(["CerosSDK"], function (CerosSDK) { // <<---this is an ugly way of nesting callbacks to load in all the necessary external libraries
             require(["bodymovin"], function (bodymovin) {
                 require(["underscore"], function (underscore) {// --- This is hopefully the end of the ugliness --->
+                    //require(["ScrollMagic"], function (ScrollMagic) {
+
                     CerosSDK.findExperience()
                         .fail(function (error) { //make sure we can load the SDK
                             console.error(error); //boops if SDK not loaded
                         })
                         .done(function (experience) { //once the SDK is loaded, do stuff
-                            //console.log(CerosSDK.EVENTS);
+                            //--------------------------------------------------------------------------------------------
+                            console.dir(CerosSDK.eventHandler);
                             var vecComponentsList = experience.findComponentsByTag("vec");
                             var vecAnimatedComponents = vecComponentsList.components; //get an array of all elements with "vec" tag
                             var vecAnimations = [];
 
-                            _.each(vecAnimatedComponents, function (val, key) {
-                                console.dir(val);
+                            _.each(vecAnimatedComponents, function (val, key) { //inject each animation into ID container
                                 var vecAnimationScript = JSON.parse(val.payload); //this might be a giant fucking security problem. revisit later.
                                 var vecId = val.id;
                                 var vecAnimator = bodymovin.loadAnimation({
                                     container: document.getElementById(vecId), // Required
                                     renderer: 'svg/canvas/html', // Required
                                     loop: false, // Optional
-                                    autoplay: true, // Optional
+                                    autoplay: false, // Optional
                                     name: vecId, // Name for future reference. Optional.
                                     animationData: vecAnimationScript
                                 });
                                 vecAnimations.push(vecAnimator);
-                                val.subscribe(CerosSDK.EVENTS.SHOWN, function (shown) {
-                                    console.log(shown);
-                                    //console.dir(this);
-                                });
-                                //console.dir(vecAnimator);
-                            });
-                            //console.dir(vecAnimations);
-                            console.dir(experience);
-                            console.dir(vecAnimatedComponents);
-                        });
 
+                            });
+
+                            $(function () {
+                                var vecElem = [];
+                                _.each(vecAnimatedComponents, function (val, key) {
+                                    var vecSel = ("#" + String(val.id));
+                                    console.log(vecSel);
+                                    var eachVec = $(vecSel);
+                                    eachVec.on('webkitAnimationStart oanimationstart msAnimationStart animationstart', function (e) {
+                                        console.log("boop")
+                                        vecAnimations[key].goToAndPlay(1, 1);
+
+                                    });
+                                    vecElem.push(eachVec);
+                                });
+                                /*
+                                vecElem[1].on('webkitAnimationEnd oanimationend msAnimationEnd animationend',function(e){
+                                        console.log("boop!");
+                                });*/
+                                console.dir(vecElem);
+                            });
+                            //--------------------------------------------------------------------------------------------
+                        });
                 });
             });
         });
