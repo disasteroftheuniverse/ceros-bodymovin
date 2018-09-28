@@ -1,1 +1,206 @@
-{"v":"5.2.1","fr":60,"ip":0,"op":111,"w":250,"h":250,"nm":"spinner2","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"datapoint","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[125,125,0],"ix":2},"a":{"a":0,"k":[167,137,0],"ix":1},"s":{"a":0,"k":[100,100,100],"ix":6}},"ao":0,"shapes":[{"ty":"gr","it":[{"ty":"rc","d":1,"s":{"a":0,"k":[120,120],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"nm":"Rectangle Path 1","mn":"ADBE Vector Shape - Rect","hd":false},{"ty":"st","c":{"a":0,"k":[0.960784014534,0.956862984452,0.941177009134,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":4,"ix":5},"lc":1,"lj":1,"ml":4,"ml2":{"a":0,"k":4,"ix":8},"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"fl","c":{"a":0,"k":[0.372549019608,0.701960784314,0.407843167174,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[167,133],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":1,"k":[{"i":{"x":[0.2],"y":[1]},"o":{"x":[0.8],"y":[0]},"n":["0p2_1_0p8_0"],"t":0,"s":[0],"e":[101]},{"i":{"x":[0.2],"y":[1]},"o":{"x":[0.8],"y":[0]},"n":["0p2_1_0p8_0"],"t":40,"s":[101],"e":[-180]},{"t":110}],"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Rectangle 1","np":3,"cix":2,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"gr","it":[{"ty":"rc","d":1,"s":{"a":0,"k":[400,400],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"nm":"Rectangle Path 1","mn":"ADBE Vector Shape - Rect","hd":false},{"ty":"fl","c":{"a":0,"k":[1,0,0,1],"ix":4},"o":{"a":0,"k":0,"ix":5},"r":1,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[164.912,136.842],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Group 2","np":2,"cix":2,"ix":2,"mn":"ADBE Vector Group","hd":false}],"ip":0,"op":111,"st":0,"bm":0}],"markers":[{"tm":40,"cm":"","dr":0},{"tm":70,"cm":"","dr":0}]}
+/**
+ * Ceros Plugin for HowlerJs
+ * @version 0.9.0
+ * @support support@ceros.com
+ *
+ * This plugin is licensed under the MIT license. A copy of this license and
+ * the accompanying source code is available at https://github.com/ceros/ceros-plugins
+ */
+
+define("modules/helpers", ["lodash"], function(s) {
+        "use strict";
+        var t = new RegExp("([^:]+):(.+)$", "i");
+        return {
+            optionsForComponent: function(t, n) {
+                var o = this.parseArrayOfTags(t.getTags()),
+                    i = s.defaultsDeep(o, n);
+                return i
+            },
+            parseArrayOfTags: function(s) {
+                for (var n = {}, o = 0; o < s.length; o++) {
+                    var i = s[o].match(t);
+                    if (i) {
+                        var e = i[2];
+                        i[2] = "true" === e || ("false" === e ? !1 : e), isNaN(e) || (i[2] = parseInt(i[2], 10)), n[i[1]] = i[2]
+                    }
+                }
+                return n
+            }
+        }
+    }), define("modules/SoundComponent", ["lodash", "Howler", "modules/helpers"], function(s, t, n) {
+        "use strict";
+        var o = function(s, t) {
+            this.funcs = {}, this.soundDefaults = {
+                preload: t,
+                shown: !1,
+                start: 0,
+                duration: null,
+                interrupt: !1,
+                fastforwardtime: 3e3,
+                rewindtime: 3e3,
+                fadeintime: 2e3,
+                fadeouttime: 1e3,
+                html5: !1,
+                stream: !1,
+                format: [],
+                volume: 100,
+                rate: 100
+            }, this.cerosComponent = s, this.id = s.id;
+            var o = s.getPayload(),
+                i = o.split("?")[0],
+                e = "www.dropbox.com",
+                d = "dl.dropboxusercontent.com",
+                h = i.indexOf("www.dropbox.com");
+            h > -1 && (i = i.slice(0, h) + d + i.slice(h + e.length, i.length)), this.url = i;
+            var u = n.optionsForComponent(this.cerosComponent, this.soundDefaults);
+            this.soundOptions = u, this.soundOptions.start /= 1e3, this.soundOptions.fastforwardtime /= 1e3, this.soundOptions.rewindtime /= 1e3, this.soundOptions.volume /= 100, this.soundOptions.rate /= 100;
+            var a = !1,
+                r = !1;
+            this.soundOptions.hasOwnProperty("background") && ("play" == this.soundOptions.background ? a = !0 : "loop" == this.soundOptions.background && (a = !0, r = !0)), 0 !== this.soundOptions.format.length && (this.soundOptions.format = [this.soundOptions.format]), this.soundOptions.stream && (this.soundOptions.html5 = !0, this.soundOptions.preload = !1, this.soundOptions.rate = 1, 0 === this.soundOptions.format.length && (this.soundOptions.format = ["mp3"])), this.sound = new Howl({
+                src: [this.url],
+                autoplay: a,
+                loop: r,
+                html5: this.soundOptions.html5,
+                format: this.soundOptions.format,
+                volume: this.soundOptions.volume,
+                rate: this.soundOptions.rate,
+                preload: this.soundOptions.preload
+            }), this.funcs.mute = this.handleMute.bind(this), this.funcs.play = this.handlePlay.bind(this), this.funcs.pause = this.handlePause.bind(this), this.funcs.reset = this.handleReset.bind(this), this.funcs.toggle = this.handleToggle.bind(this), this.funcs.loop = this.handleLoop.bind(this), this.funcs.looptoggle = this.handleLoopToggle.bind(this), this.funcs.fastforward = this.handleFastForward.bind(this), this.funcs.rewind = this.handleRewind.bind(this), this.funcs.stop = this.handleStop.bind(this), this.funcs.fadeout = this.handleFadeOut.bind(this), this.funcs.fadein = this.handleFadeIn.bind(this)
+        };
+        return o.prototype = {
+            play: function() {
+                if (!this.soundOptions.preload) return this.sound.on("load", function() {
+                    this.soundOptions.preload = !0, this.play()
+                }.bind(this)), void this.sound.load();
+                var s = this.soundOptions.start;
+                this.sound.seek() < s && this.sound.seek(s), this.soundOptions.interrupt && this.interrupt(), this.sound.playing() || this.sound.play()
+            },
+            interrupt: function() {
+                this.sound.playing() && (this.sound.stop(), this.play())
+            },
+            handleMute: function() {
+                this.sound.mute() ? this.sound.mute(!1) : this.sound.mute(!0)
+            },
+            handlePlay: function() {
+                this.play()
+            },
+            handlePause: function() {
+                this.sound.pause()
+            },
+            handleToggle: function() {
+                this.sound.playing() ? this.sound.pause() : this.play()
+            },
+            handleReset: function() {
+                this.sound.seek(this.soundOptions.start)
+            },
+            handleLoop: function() {
+                this.sound.loop(!0), this.play()
+            },
+            handleLoopToggle: function() {
+                this.sound.loop(!0), this.handleToggle()
+            },
+            handleFastForward: function() {
+                var s = this.soundOptions.fastforwardtime,
+                    t = this.sound.seek();
+                this.sound.seek(t + s)
+            },
+            handleRewind: function() {
+                var s = this.soundOptions.start,
+                    t = this.soundOptions.rewindtime,
+                    n = this.sound.seek();
+                n - t >= s ? this.sound.seek(n - t) : this.sound.seek(s)
+            },
+            handleFadeIn: function() {
+                this.sound.playing() || (this.sound.volume(0), this.play(), this.sound.fade(0, this.soundOptions.volume, this.soundOptions.fadeintime))
+            },
+            handleFadeOut: function() {
+                this.sound.fade(this.sound.volume(), 0, this.soundOptions.fadeouttime), s.delay(function() {
+                    this.handleStop()
+                }.bind(this), this.soundOptions.fadeouttime)
+            },
+            handleStop: function() {
+                this.sound.stop()
+            },
+            dispatch: function(s) {
+                this.funcs.hasOwnProperty(s) && this.funcs[s]()
+            },
+            getName: function() {
+                return this.soundOptions.hasOwnProperty("name") ? this.soundOptions.name : null
+            }
+        }, o
+    }), define("modules/SoundComponents", ["lodash", "Howler", "modules/helpers", "modules/SoundComponent"], function(s, t, n, o) {
+        "use strict";
+        var i = function(t) {
+            this.sounds = {}, this.names = {};
+            var n = [];
+            this.cerosComponentCollection = t, s.forEach(this.cerosComponentCollection.components, function(s, t) {
+                var i = !0,
+                    e = s.getPayload();
+                n.indexOf(e) > -1 ? i = !1 : n.push(e), this.sounds[s.id] = new o(s, i);
+                var d = this.sounds[s.id].getName();
+                null !== d && (this.names[d] = s.id)
+            }.bind(this))
+        };
+        return i.prototype = {
+            dispatchAll: function(t) {
+                s.forEach(this.sounds, function(s, n) {
+                    s.dispatch(t)
+                })
+            },
+            dispatch: function(s, t) {
+                for (var n = 0; n < t.length; n++) {
+                    var o = t[n];
+                    this.sounds.hasOwnProperty(o) && this.sounds[o].dispatch(s)
+                }
+            },
+            nameMatch: function(s) {
+                return this.names.hasOwnProperty(s) ? this.names[s] : null
+            }
+        }, i
+    }),
+    function() {
+        "use strict";
+        var s, t = document.getElementById("ceros-audio-plugin"),
+            n = t.getAttribute("src");
+        if ("undefined" != typeof n) {
+            var o = n.split("?")[0];
+            s = o.split("/").slice(0, -1).join("/") + "/"
+        } else s = "./";
+        require.config({
+            paths: {
+                CerosSDK: "//sdk.ceros.com/standalone-player-sdk-v3",
+                Howler: "https://cdnjs.cloudflare.com/ajax/libs/howler/2.0.0/howler",
+                lodash: "https://cdn.jsdelivr.net/lodash/4.14.0/lodash.min",
+                modules: s + "modules"
+            }
+        }), require(["CerosSDK", "Howler", "lodash", "modules/SoundComponents"], function(s, t, n, o) {
+            s.findExperience().done(function(t) {
+                var i = t.findComponentsByTag("playsound"),
+                    e = t.findComponentsByTag("sound-click"),
+                    d = new o(i),
+                    h = function(s) {
+                        var t = s.getTags(),
+                            o = [];
+                        n.forEach(t, function(s, t) {
+                            if (s.indexOf("target:") > -1) {
+                                var n = s.slice(7, s.length);
+                                o.push(n)
+                            }
+                        });
+                        for (var i = 0; i < o.length; i++) null !== d.nameMatch(o[i]) && (o[i] = d.nameMatch(o[i]));
+                        return 0 === o.length && o.push(s.id), o
+                    },
+                    u = function(s) {
+                        var t = null,
+                            o = s.getTags(),
+                            i = h(s);
+                        n.forEach(o, function(s, n) {
+                            s.indexOf("event:") > -1 ? (t = s.slice(6, s.length), d.dispatch(t, i)) : s.indexOf("eventall:") > -1 && (t = s.slice(9, s.length), d.dispatchAll(t))
+                        })
+                    };
+                e.subscribe(s.EVENTS.CLICKED, function(s) {
+                    u(s)
+                })
+            })
+        })
+    }(), define("src/audio/audio", function() {});

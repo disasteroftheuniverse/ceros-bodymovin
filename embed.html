@@ -62,9 +62,19 @@
                                     //console.dir(vecAnimatedComponents);
 
                                 });
+                            var mouse = vecComponentsList.components[0];
+                            console.dir(mouse);
+                            console.dir(CerosSDK.EVENTS);
+                            mouse.subscribe(CerosSDK.EVENTS.CLICKED, function(){
+                                console.log("boop!");
+                            });
                             });
 
+
+                            
                             //--------------------------------------------------------------------------------------------
+
+
                         });
                 });
             });
